@@ -1,0 +1,108 @@
+#Determine average number of ASVs shared between juveniles skin and mother skin
+#Script complements the sourceTracker analysis
+#seeks to further investigate shared bacteria between mothers and juveniles
+#in particular skin to skin, gut to gut, skin to gut and vice versa
+
+setwd("Thesis/Herpele/transmissionfiles/")
+library(tidyverse)
+install.packages("ggpubr")
+library(ggpubr)
+library(rstatix)
+library(RColorBrewer)
+library(readxl)
+motherskingut_tojuvskin_chi <- read.delim("motherskingut_tojuvskin3.txt", row.names = 1)
+chisq <- chisq.test(motherskingut_tojuvskin_chi)
+chisq
+motherskingut_tojuvgut_chi <- read.delim("motherskingut_tojuvgut3.txt", row.names = 1)
+chisq_gut <- chisq.test(motherskingut_tojuvgut_chi)
+chisq_gut
+motherskinandgut_tojuvskin <- read_excel("mothersinandgut_tojuvskin.xlsx")
+
+ggplot(motherskinandgut_tojuvskin, aes(factor(shared), reads))+
+  geom_boxplot(aes(colour = shared),lwd = 3, fatten = 1)+
+  scale_color_manual(name = "shared", values =c("red", "blue"))+
+  ggtitle("juveniles skin")+
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  theme(axis.ticks.x=element_blank(),
+        axis.ticks.y = element_blank())+
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=18))+
+  theme(legend.position = "none") +
+  theme(legend.title = element_blank())+
+  theme(legend.text=element_text(size=18))+
+  theme(legend.key.size = unit(1.1, 'cm'))+
+  labs(x = "", y = "number of ASVs")
+#determime bacteria shared between mother skin and juv skin
+motherskin_tojuvskin_stats_skin = motherskinandgut_tojuvskin %>%
+  select(reads, shared) %>%
+  filter(shared == "shared_mother_skin") %>%
+  summarise(mean_skin = mean(reads),
+            min_skin = min(reads),
+            max_skin = max(reads),
+            sd_skin =sd(reads),
+            pcent_skin = reads/sum(reads)) %>%
+  arrange(pcent_skin)
+motherskin_tojuvskin_stats_skin
+motherskin_tojuvskin_stats_skin
+motherskin_tojuvskin_stats_skin
+motherskin_tojuvskin_stats_skin
+#bacteria shared between mother gut and juv skin
+mothergut_tojuvskin_stats_skin = motherskinandgut_tojuvskin %>%
+  select(reads, shared) %>%
+  filter(shared == "shared_mother_gut") %>%
+  summarise(mean_skin = mean(reads),
+            min_skin = min(reads),
+            max_skin = max(reads),
+            sd_skin =sd(reads),
+            pcent_skin = reads/sum(reads)) %>%
+  arrange(pcent_skin)
+mothergut_tojuvskin_stats_skin
+#bacteriea shared between mother skin and gut and juve gut
+###################
+motherskinandgut_tojuvgut = read_excel("motherskinandgut_tojuvgut.xlsx")
+head(motherskinandgut_tojuvgut)
+motherskinandgut_tojuvgut
+setwd("C:/Users/Marcell/OneDrive - University of Florida/Desktop/micropapers/transmissionfiles")
+#bacteriea shared between mother skin and gut and juve gut
+###################
+motherskinandgut_tojuvgut = read_excel("motherskinandgut_tojuvgut.xlsx")
+ggplot(motherskinandgut_tojuvgut, aes(factor(shared), reads))+
+  geom_boxplot(aes(colour = shared),lwd = 3, fatten = 1)+
+  scale_color_manual(name = "shared", values =c("red", "blue"))+
+  ggtitle("gut of juveniles")+
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  theme(axis.ticks.x=element_blank(),
+        axis.ticks.y = element_blank())+
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=18))+
+  theme(legend.position = "none") +
+  theme(legend.title = element_blank())+
+  theme(legend.text=element_text(size=18))+
+  theme(legend.key.size = unit(1.1, 'cm'))+
+  labs(x = "", y = "number of ASVs")
+#bacteria shared between mother skin and juv gut
+motherskin_tojuvgut_stats_skin = motherskinandgut_tojuvgut %>%
+  select(reads, shared) %>%
+  filter(shared == "shared_mother_skin") %>%
+  summarise(mean_skin = mean(reads),
+            min_skin = min(reads),
+            max_skin = max(reads),
+            sd_skin =sd(reads),
+            pcent_skin = reads/sum(reads)) %>%
+  arrange(pcent_skin)
+
+#bacteria shared between mother gut and juveniles gut
+mothergut_tojuvgut_stats_gut = motherskinandgut_tojuvgut %>%
+  select(reads, shared) %>%
+  filter(shared == "shared_mother_gut") %>%
+  summarise(mean_gut = mean(reads),
+            min_gut = min(reads),
+            max_gut = max(reads),
+            sd_gut =sd(reads),
+            pcent_gut = reads/sum(reads)) %>%
+  arrange(pcent_gut)
+mothergut_tojuvgut_stats_gut
