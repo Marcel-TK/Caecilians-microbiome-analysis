@@ -2,7 +2,7 @@
 #Script complements the sourceTracker analysis
 #seeks to further investigate shared bacteria between mothers and juveniles
 #in particular skin to skin, gut to gut, skin to gut and vice versa
-
+#The scripts generate Fig. S7 A and B
 setwd("Thesis/Herpele/transmissionfiles/")
 library(tidyverse)
 install.packages("ggpubr")
