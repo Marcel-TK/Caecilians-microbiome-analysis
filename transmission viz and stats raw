@@ -4,21 +4,21 @@
 #in particular skin to skin, gut to gut, skin to gut and vice versa
 #The scripts generate Fig. S7 A and B
 setwd("Thesis/Herpele/transmissionfiles/")
-library(tidyverse)
+library(tidyverse) #load the necessary library, convenient to load tidyvers as it simultaneously load ggplot, tidyr, dplyr and more
 install.packages("ggpubr")
 library(ggpubr)
 library(rstatix)
 library(RColorBrewer)
 library(readxl)
-motherskingut_tojuvskin_chi <- read.delim("motherskingut_tojuvskin3.txt", row.names = 1)
-chisq <- chisq.test(motherskingut_tojuvskin_chi)
+motherskingut_tojuvskin_chi <- read.delim("motherskingut_tojuvskin3.txt", row.names = 1)$read in data while spedifying that first row are names
+chisq <- chisq.test(motherskingut_tojuvskin_chi) # run chisquare on raw count of asvs shared by mother and juveniles
 chisq
 motherskingut_tojuvgut_chi <- read.delim("motherskingut_tojuvgut3.txt", row.names = 1)
 chisq_gut <- chisq.test(motherskingut_tojuvgut_chi)
 chisq_gut
 motherskinandgut_tojuvskin <- read_excel("mothersinandgut_tojuvskin.xlsx")
 
-ggplot(motherskinandgut_tojuvskin, aes(factor(shared), reads))+
+ggplot(motherskinandgut_tojuvskin, aes(factor(shared), reads))+ #plot shared asvs between mothers and juveniles using ggplot2
   geom_boxplot(aes(colour = shared),lwd = 3, fatten = 1)+
   scale_color_manual(name = "shared", values =c("red", "blue"))+
   ggtitle("juveniles skin")+
