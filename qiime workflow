@@ -1,0 +1,88 @@
+#Analysis of microbiome data using qiime2
+#I) subsampling uniquely samples for Herpele
+
+qiime feature-table filter-samples 
+--i-table "/home/m.tkouete/next_gen/Mic18CMR/OTU_table-dada2.qza" 
+--m-metadata-file "/home/m.tkouete/next_gen/Mic18CMR.txt" 
+--p-where "Genus='Herpele'" --o-filtered-table HerpFeat.qza
+
+#II) Obtain the rooted and the unrooted tree: output comprise four files,
+# the unrooted the rooted and two aligned set of sequences. 
+
+qiime phylogeny align-to-tree-mafft-fasttree 
+--i-sequences rep-seqs-dada2.qza 
+--o-alignment AlignedRepSeqHerpSkinGut_NoRaref.qza 
+--o-masked-alignment FiltAlignRepSetseqHerpSkinGutNoRaref.qza 
+--o-tree UnrootedTreeHerpSkinGutNoRaref.qza 
+--o-rooted-tree RootedHerpSkinGutNopRaref
+
+#III) convert the OTU-table to a biom file and then to txt file that is human readable
+#1-	First export the feature table from qiime and save it as a .biom object
+#qiime tools export --input-path HerpFeatTabSkiGutNoRf.qza --output-path exported-HerpFeatTabSkiGutNoRf
+#with this command a new folder is automaticaly created in the working directory and this newly created file bears the name
+#of the exported command. In this specific case the name is "exported-HerpFeatTabSkiGutNoRf". This folder contains a file 
+#named feature-table.biom to be converted to a .txt file.
+
+#2-	Convert the .biom to a .tsv format that is readable 
+
+#change directory to get where the .biom file is located
+	cd exported-HerpFeatTabSkiGutNoRf
+
+#then converted the file by using the codes
+	biom convert -i feature-table.biom -o HerpFeatTabSkiGutNoRf.tsv --to-tsv
+
+#2-a) convert the txt file to tsv file in two steps
+- first convert txt to csv: cat file.txt | tr "\t" "," > outfile.csv
+- second convert csv to tsv: cat outfile.csv sed 's/,/\tg' > outfiles2.tsv
+
+#3- there are alternative codes that I found while searching how to convert between tsv and csv foramts
+
+cat otu_table.tsv | tr "\\t" "," > otus_table.csv
+
+ csvformat -T in.csv > out.txt
+
+  cat file.csv | tr  ',' '\n' > file.txt #This works for tramsforming file from .csv to .txt,   
+
+#III) Demultiplexing, this code on HPG for about about 30 mn
+
+qiime quality-filter q-score
+--i-demux "/home/m.tkouete/next_gen/Mic18CMR/DemultiSequences_Marcel.qza"
+--p-min-quality 20 
+--o-filter-stats qfiltered-stats_Demul.qza 
+--o-filtered-sequences qfiltered_Demulseq.qza
+
+#IV) denoise. The code to accomplish this step comes from the link below
+
+qiime dada2 denoise-single --i-demultiplexed-seqs \
+/home/m.tkouete/next_gen/Mic18CMR/skipRaref/qfiltered_Demulseq.qza \
+--p-trunc-len 150 --output-dir /home/m.tkouete/next_gen/Mic18CMR/skipRaref/dada \
+--o-denoising-stats denoStat.qza \
+--o-representative-sequences Repseq.qza \
+--o-table OTU-table.qza
+
+#I converted the taxonomy file into a .biom. This is done by using "unzip". Then the .biom file is converted into a .txt (see formula above) and after
+#this I loaded the .txt file into an excel spreadsheet and opened to view the taxonomy associated to each of the OTU. I treated the otu file obtained from
+#dada pipeline similarly as the taxonomy file (unzip then convert into a .txt file). I loaded both files into r and merge both the taxonomy and the OTU by 
+#the column OTU ID. Remove the column in the taxonomy file that indicates the confidence, it is useless.
+#******very important*****
+#select the column containing the taxonomy and hit "control + F" then in find hit "space bar" on the keyboard then in the "replace" remove the space. This will eliminated all the spaces
+#found between the ";" and the letter. Secondly remember to open the newly merged file contaiing the OTU and the taxonomy and place the pound (#) in front of 
+#OTU. Lastly drag the taxonomy column to the end of the file, after all of the samples.
+#After this manipulation convert the merged file of taxonomy and otu into a .biom format following the code:
+
+#This is to convert from .biom to tsv: biom convert
+
+ -i table.biom -o table.from_biom.txt --to-tsv
+
+biom convert 
+-i Taxo_OTUfrcae.txt 
+-o new_otu_table.biom --to-hdf5 --table-type="OTU table" --process-obs-metadata taxonomy
+
+###########addition was made to this cheatsheet on 3 August 2021
+
+
+#to calculate the core microbiome of adutls skin and gut of Herpele I used the website http://coremic2.appspot.com/
+#This website accepts a json file format which is still a .biom file but is converted with a code that is slightly different
+#from the one above : 
+
+biom convert -i Taxo_OTUfrcae.txt -o new_otu_table.biom --table-type="OTU table" --to-json
